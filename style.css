@@ -1,0 +1,102 @@
+#filter-container {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+#filter-container button {
+  font-family: Roboto;
+  font-size: 0.9rem;
+  min-height: 1.8rem;
+  margin: 0 1rem;
+}
+
+#filter-container select {
+  font-family: Roboto;
+  font-size: 0.9rem;
+  min-height: 1.8rem;
+}
+
+.api-result-list {
+  line-height: 20px;
+  font-family: Roboto;
+  border-radius: 15px;
+  margin: 0.5rem;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  min-height: 8rem;
+}
+
+.api-result-list h6{
+  max-width: 80%;
+}
+
+.api-result-list p {
+  color: #777780;
+  font-size: 83%;
+  max-width: 80%
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-container button {
+  padding:0.8rem;
+  border-radius: 25px;
+  border: none;
+  background-color: 
+#61d09e;
+color: white;
+font-weight: bold;
+transition: 0.3s ease-out;
+}
+
+.button-container button:hover {
+  background-color: #198754;
+}
+
+.button-container a {
+  color: white;
+}
+
+#projects-main-list h3{
+  padding: 1rem;
+  text-align: center;
+}
+
+#pagination {
+  font-family: Roboto;
+  padding: 1rem;
+  margin: 1rem 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#pagination button {
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 25px;
+  outline: none;
+  background-color: #61d09e;
+  color: white;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  transition: 0.2s ease-out;
+}
+
+#pagination button:hover {
+  background-color: #198754;
+}
+
+#pagination button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Document</title>
+</head>
+<body>
+  <div id='filter-container'>
+    <button class="filter-button">Filtrar</button>
+    <select id="filter-options">
+        <option value="all">All</option>
+        <option value="typing-professional">Typing Professional</option>
+        <option value="visual-assistant">Visual Assistant</option>
+        <option value="social-media-professional">Social Media Professional</option>
+    </select>
+  </div>
+  <ul id='projects-main-list'>
+    <h3 class='loading-message'>Carregando...</h3>
+  </ul>
+  <div id="pagination">
+    <button id="prevPage">Página Anterior</button>
+    <button id="nextPage">Próxima Página</button>
+  </div>
+
+  <script>
+    const mainList = document.querySelector('#projects-main-list');
+    const filterOptions = document.querySelector('#filter-options');
+    const filterButton = document.querySelector('.filter-button');
+    const prevPageButton = document.querySelector('#prevPage');
+    const nextPageButton = document.querySelector('#nextPage');
+
+
+    let currentPage = 1; // Página atual
+    const projectsPerPage = 10; // Projetos por página
+    let projects = []; // Array para armazenar todos os projetos
+    const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission'];
+    const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
+    const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
+
+    filterButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      fetchProjects(currentPage, filterOptions.value);
+      console.log(filterOptions.value);
+    });
+
+    async function fetchProjects(page, category='all') {
+        try {
+            const response = await fetch('https://www.freelancer.com/api/projects/0.1/projects/all/');
+            if (!response.ok) {
+                throw new Error('Erro na solicitação da API');
+            }
+            const data = await response.json();
+            console.log(data, category);
+            if (data.result && data.result.projects) {
+                projects = data.result.projects; // Armazena todos os projetos
+
+                console.log(projects);
+                const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
+
+                const filteredProjects = projects.filter(item => {
+                  if (category === 'all') {
+                    return true;
+                  } else if (category === 'typing-professional') {
+                    return regexCategory.test(item.seo_url);
+                  } else if (category === 'visual-assistant') {
+                    return regexCategory.test(item.seo_url);
+                  } else if (category === 'social-media-professional') {
+                    return regexCategory.test(item.seo_url);
+                  }
+                  return false;
+                });
+                console.log(filteredProjects);
+
+                // Calcular o índice inicial e final dos projetos a serem exibidos
+                const startIndex = (page - 1) * projectsPerPage;
+                const endIndex = startIndex + projectsPerPage;
+
+                // Filtrar os projetos para a página atual
+                const projectsToDisplay = projects.slice(startIndex, endIndex);
+
+                // Limpar a lista antes de adicionar novos projetos
+                mainList.innerHTML = '';
+
+                projectsToDisplay.forEach(item => {
+                    const article = document.createElement('article');
+                    article.className = 'api-result-list';
+
+                    const contentContainer = document.createElement('div');
+                    contentContainer.className = 'content-container';
+                    contentContainer.innerHTML = `
+                        <h6>${item.title}</h6>
+                        <p>${item.preview_description}</p>
+                    `;
+
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.className = 'button-container';
+                    const button = document.createElement('button');
+                    button.innerHTML = `<a href="https://www.freelancer.com/projects/${item.seo_url}" target="_blank">Apply Now »</a>`;
+                    buttonContainer.appendChild(button);
+
+                    article.appendChild(contentContainer);
+                    article.appendChild(buttonContainer);
+
+                    mainList.appendChild(article);
+                });
+
+                // Atualizar os botões de página
+                updatePaginationButtons();
+            } else {
+                console.log('Nenhum projeto encontrado.');
+            }
+        } catch (error) {
+            console.error('Erro na solicitação da API: ' + error.message);
+        }
+    }
+
+    function updatePaginationButtons() {
+        const totalPages = Math.ceil(projects.length / projectsPerPage);
+
+        prevPageButton.disabled = currentPage === 1;
+        nextPageButton.disabled = currentPage === totalPages;
+    }
+
+    prevPageButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            fetchProjects(currentPage);
+        }
+    });
+
+    nextPageButton.addEventListener('click', () => {
+        const totalPages = Math.ceil(projects.length / projectsPerPage);
+        if (currentPage < totalPages) {
+            currentPage++;
+            fetchProjects(currentPage);
+        }
+    });
+
+    // Chame a função para carregar a primeira página
+    fetchProjects(currentPage);
+</script>
+</body>
+</html>
