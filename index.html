@@ -11,9 +11,9 @@
     <button class="filter-button">Filtrar</button>
     <select id="filter-options">
         <option value="all">All</option>
-        <option value="typing-professional">Typing Professional</option>
-        <option value="visual-assistant">Visual Assistant</option>
-        <option value="social-media-professional">Social Media Professional</option>
+        <option value="typing_professional">Typing Professional</option>
+        <option value="visual_assistant">Visual Assistant</option>
+        <option value="social_media_professional">Social Media Professional</option>
     </select>
   </div>
   <ul id='projects-main-list'>
@@ -42,7 +42,6 @@
     filterButton.addEventListener('click', (e) => {
       e.preventDefault();
       fetchProjects(currentPage, filterOptions.value);
-      console.log(filterOptions.value);
     });
 
     async function fetchProjects(page, category='all') {
@@ -61,13 +60,13 @@
 
                 const filteredProjects = projects.filter(item => {
                   if (category === 'all') {
-                    return true;
-                  } else if (category === 'typing-professional') {
-                    return regexCategory.test(item.seo_url);
-                  } else if (category === 'visual-assistant') {
-                    return regexCategory.test(item.seo_url);
-                  } else if (category === 'social-media-professional') {
-                    return regexCategory.test(item.seo_url);
+                      return true; // Mostrar todos os projetos
+                  } else if (category === 'typing_professional') {
+                      return tipyingCategory.some(word => item.seo_url.match(new RegExp(`^(${word})/`, 'i')));
+                  } else if (category === 'visual_assistant') {
+                      return virtualAssistantCategory.some(word => item.seo_url.match(new RegExp(`^(${word})/`, 'i')));
+                  } else if (category === 'social_media_professional') {
+                      return socialMediaCategory.some(word => item.seo_url.match(new RegExp(`^(${word})/`, 'i')));
                   }
                   return false;
                 });
