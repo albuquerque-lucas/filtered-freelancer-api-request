@@ -40,7 +40,7 @@
     let currentPage = 1; // Página atual
     const projectsPerPage = 10; // Projetos por página
     let projects = []; // Array para armazenar todos os projetos
-    const projectsTest = [];
+    const projectsList = [];
     const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission'];
     const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
     const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
@@ -108,8 +108,8 @@
       }
     });
     
-    async function fetchProjects(page, category = 'all', offset = 0) {
-      const all = await getAll(projectsTest);
+    async function fetchProjects(page, category = 'all', offset = 0, primeList=projects) {
+      const all = await getAll(primeList);
       localStorage.setItem('saved_freelancer_projects', JSON.stringify(all));
 
           const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
@@ -182,11 +182,11 @@
           });
 
           // Atualizar os botões de página
-          updatePaginationButtons();
+          updatePaginationButtons(projects);
         }
 
-    function updatePaginationButtons() {
-      const totalPages = Math.ceil(projects.length / projectsPerPage);
+    function updatePaginationButtons(referenceList) {
+      const totalPages = Math.ceil(referenceList.length / projectsPerPage);
       console.log('no botao', totalPages);
 
       prevPageButton.disabled = currentPage === 1;
@@ -194,9 +194,9 @@
     }
 
     prevPageButton.addEventListener('click', () => {
-      if (currentPage > 1 && !fetching) {
+      if (currentPage > 1) {
         currentPage--;
-        fetchProjects(currentPage);
+        fetchProjects(currentPage, 'all', 0, projects);
       }
     });
 
@@ -204,7 +204,7 @@
       const totalPages = Math.ceil(projects.length / projectsPerPage);
       if (currentPage < totalPages && !fetching) {
         currentPage++;
-        fetchProjects(currentPage);
+        fetchProjects(currentPage, 'all', 0, projects);
       };
     });
 
