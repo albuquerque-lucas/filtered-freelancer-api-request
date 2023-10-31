@@ -13,7 +13,7 @@
     <select id="filter-options">
         <option value="all">All</option>
         <option value="typing_professional">Typing Professional</option>
-        <option value="visual_assistant">Visual Assistant</option>
+        <option value="virtual_assistant">Virtual Assistant</option>
         <option value="social_media_professional">Social Media Professional</option>
     </select>
   </div>
@@ -39,14 +39,22 @@
 
     let currentPage = 1; // Página atual
     const projectsPerPage = 10; // Projetos por página
-    let projects = []; // Array para armazenar todos os projetos
-    let alternativeList = [];
     const projectsList = [];
     const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission', 'content-writing', 'research', 'research_writing'];
     const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
     const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
     const allCategoriesList = [...tipyingCategory, ...virtualAssistantCategory, ...socialMediaCategory];
-    let fetching = false; // Variável para controlar se já está buscando
+    let projects = []; // Array para armazenar todos os projetos
+    let initialProjectsList = JSON.parse(localStorage.getItem('complete_initial_list'));
+    if (localStorage.getItem('complete_initial_list') !== null) {
+      console.log('nao e nulo');
+      initialProjectList = JSON.parse(localStorage.getItem('complete_initial_list'));
+      console.log('initialProjectList - 0', initialProjectsList);
+    } else {
+      console.log('e nulo');
+      initialProjectsList = [];
+    }
+    let completeInitialList = [];
     
     reloadQueryButton.addEventListener('click', (e) => {
       e.preventDefault();
@@ -58,7 +66,7 @@
     const getAll = async (initialList) => {
       const savedProjects = localStorage.getItem('saved_freelancer_projects');
       if (savedProjects) {
-        console.log('Pegou do local storage');
+        // console.log('Pegou do local storage');
         return JSON.parse(savedProjects);
       } else {
         const response01 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=0`);
@@ -96,6 +104,10 @@
         // initialList.push(data09.result.projects);
         // initialList.push(data10.result.projects);
         // initialList.push(data11.result.projects);
+
+        if (initialProjectsList.length < 2) {
+          initialProjectsList = initialList;
+        }
         return initialList;
         
       }
@@ -104,10 +116,10 @@
     
     filterButton.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!fetching) {
-        currentPage = 1; // Reset da página para a primeira
-        fetchProjects(currentPage, filterOptions.value);
-      }
+      console.log('FILTER BTN', initialProjectsList);
+      localStorage.setItem('saved_freelancer_projects', JSON.stringify(projects));
+      currentPage = 1; // Reset da página para a primeira
+      fetchProjects(currentPage, filterOptions.value);
     });
     
     async function fetchProjects(page, category = 'all', offset = 0) {
@@ -117,6 +129,7 @@
           const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
 
           const completeList = [];
+          console.log('Filtered Projects - 1:', all);
           const filteredProjects = all.map((item) => {
             return item.filter((subItem) =>{
               if (category === 'all') {
@@ -125,7 +138,7 @@
                 return true; // Mostrar todos os projetos
               } else if (category === 'typing_professional') {
                 return tipyingCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
-              } else if (category === 'visual_assistant') {
+              } else if (category === 'virtual_assistant') {
                 return virtualAssistantCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
               } else if (category === 'social_media_professional') {
                 return socialMediaCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
@@ -134,27 +147,45 @@
 
             });
           });
+          console.log('initialProjectList - 1', initialProjectsList);
 
-          projects = filteredProjects;
-          console.log('all', all);
-          localStorage.removeItem('saved_freelancer_projects');
+          if (localStorage.getItem('complete_initial_list') === null) {
+            console.log('meio', initialProjectsList);
+            initialProjectsList = initialProjectsList.map((item) => {
+              return item.filter((subItem) => {
+                return allCategoriesList.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
+              });
+            });
+            localStorage.setItem('initial_projects_list', JSON.stringify(initialProjectsList));
+            localStorage.setItem('complete_initial_list', JSON.stringify(initialProjectsList));
+            initialProjectsList.forEach((item) => {
+              item.forEach((subItem) => {
+                completeInitialList.push(subItem);
+              });
+            });
+            
+            console.log('initialProjectList - 2', initialProjectsList);
+            console.log('initialProjectList - 3', completeInitialList);
+            localStorage.setItem('complete_initial_list', JSON.stringify(completeInitialList));
+          }
+
           localStorage.setItem('saved_freelancer_projects', JSON.stringify(filteredProjects));
           filteredProjects.forEach((item) => {
             item.forEach((subItem) => {
               completeList.push(subItem);
             });
           });
-          console.log('completeList', completeList);
-          const refactoredList = completeList.map((item) => {
-            const newItem = {
-              title: item.title,
-              preview_description: item.preview_description,
-              seo_url: item.seo_url,
-              category: getCategoryName(item.seo_url),
-            };
-            return newItem;
-          });
-          projects = refactoredList;
+          // const refactoredList = completeList.map((item) => {
+          //   const newItem = {
+          //     title: item.title,
+          //     preview_description: item.preview_description,
+          //     seo_url: item.seo_url,
+          //     category: getCategoryName(item.seo_url),
+          //   };
+          //   return newItem;
+          // });
+          // projects = refactoredList;
+          projects = completeList;
           console.log('new object', projects);
           // Calcular o índice inicial e final dos projetos a serem exibidos
           const startIndex = (page - 1) * projectsPerPage;
@@ -173,7 +204,7 @@
             contentContainer.className = 'content-container';
             contentContainer.innerHTML = `
               <h6>${item.title}</h6>
-              <p class="category-name">${item.category}</p>
+              <p class="category-name">${getCategoryName(item.seo_url)}</p>
               <p>${item.preview_description}</p>
             `;
 
@@ -200,20 +231,20 @@
       nextPageButton.disabled = currentPage === totalPages;
     }
 
-    alternativeList = projects;
-
     prevPageButton.addEventListener('click', () => {
+      fetchProjects(currentPage);
       if (currentPage > 1) {
         currentPage--;
-        fetchProjects(currentPage);
+        fetchProjects(currentPage, filterOptions.value);
       }
     });
 
     nextPageButton.addEventListener('click', () => {
+      fetchProjects(currentPage);
       const totalPages = Math.ceil(projects.length / projectsPerPage);
-      if (currentPage < totalPages && !fetching) {
+      if (currentPage < totalPages) {
         currentPage++;
-        fetchProjects(currentPage);
+        fetchProjects(currentPage, filterOptions.value);
       };
     });
 
@@ -225,7 +256,7 @@
       if (tipyingCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
         return 'Typing Professional';
       } else if (virtualAssistantCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
-        return 'Visual Assistant';
+        return 'Virtual Assistant';
       } else if (socialMediaCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
         return 'Social Media Professional';
       }
