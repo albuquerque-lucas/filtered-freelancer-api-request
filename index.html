@@ -27,9 +27,6 @@
 
   <script>
 
-    // Nesta branch, observe o console do navegador. O sistema de paginacao nao esta funcionando.
-    // Mas a dinamica de local storage vs requisicoes esta sendo feita.
-
     const mainList = document.querySelector('#projects-main-list');
     const filterOptions = document.querySelector('#filter-options');
     const filterButton = document.querySelector('.filter-button');
@@ -48,7 +45,7 @@
     let initialProjectsList = JSON.parse(localStorage.getItem('complete_initial_list'));
     if (localStorage.getItem('complete_initial_list') !== null) {
       console.log('nao e nulo');
-      initialProjectList = JSON.parse(localStorage.getItem('complete_initial_list'));
+      initialProjectList = JSON.parse(localStorage.getItem('filtered_list'));
       console.log('initialProjectList - 0', initialProjectsList);
     } else {
       console.log('e nulo');
@@ -122,14 +119,19 @@
       fetchProjects(currentPage, filterOptions.value);
     });
     
-    async function fetchProjects(page, category = 'all', offset = 0) {
-      const all = await getAll(projects);
+    async function fetchProjects(page, category = 'all') {
+      let all = await getAll(projects);
       localStorage.setItem('saved_freelancer_projects', JSON.stringify(all));
 
           const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
 
           const completeList = [];
           console.log('Filtered Projects - 1:', all);
+
+          if(localStorage.getItem('filtered_list') !== null) {
+            all = JSON.parse(localStorage.getItem('filtered_list'));
+          }
+
           const filteredProjects = all.map((item) => {
             return item.filter((subItem) =>{
               if (category === 'all') {
@@ -147,16 +149,16 @@
 
             });
           });
+          localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
           console.log('initialProjectList - 1', initialProjectsList);
+          console.log('Filtered Projects - 2', filteredProjects);
 
           if (localStorage.getItem('complete_initial_list') === null) {
-            console.log('meio', initialProjectsList);
             initialProjectsList = initialProjectsList.map((item) => {
               return item.filter((subItem) => {
                 return allCategoriesList.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
               });
             });
-            localStorage.setItem('initial_projects_list', JSON.stringify(initialProjectsList));
             localStorage.setItem('complete_initial_list', JSON.stringify(initialProjectsList));
             initialProjectsList.forEach((item) => {
               item.forEach((subItem) => {
@@ -175,16 +177,8 @@
               completeList.push(subItem);
             });
           });
-          // const refactoredList = completeList.map((item) => {
-          //   const newItem = {
-          //     title: item.title,
-          //     preview_description: item.preview_description,
-          //     seo_url: item.seo_url,
-          //     category: getCategoryName(item.seo_url),
-          //   };
-          //   return newItem;
-          // });
-          // projects = refactoredList;
+
+
           projects = completeList;
           console.log('new object', projects);
           // Calcular o índice inicial e final dos projetos a serem exibidos
@@ -225,7 +219,7 @@
 
     function updatePaginationButtons(referenceList) {
       const totalPages = Math.ceil(referenceList.length / projectsPerPage);
-      console.log('no botao', totalPages);
+      // console.log('no botao', totalPages);
 
       prevPageButton.disabled = currentPage === 1;
       nextPageButton.disabled = currentPage === totalPages;
