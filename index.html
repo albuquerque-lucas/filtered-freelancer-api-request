@@ -146,13 +146,14 @@
             };
             return newItem;
           });
-          console.log('new object', refactoredList);
+          projects = refactoredList;
+          console.log('new object', projects);
           // Calcular o índice inicial e final dos projetos a serem exibidos
           const startIndex = (page - 1) * projectsPerPage;
           const endIndex = startIndex + projectsPerPage;
 
           // Filtrar os projetos para a página atual
-          const projectsToDisplay = refactoredList.slice(startIndex, endIndex);
+          const projectsToDisplay = projects.slice(startIndex, endIndex);
 
           // Limpar a lista antes de adicionar novos projetos
           mainList.innerHTML = '';
@@ -186,6 +187,7 @@
 
     function updatePaginationButtons() {
       const totalPages = Math.ceil(projects.length / projectsPerPage);
+      console.log('no botao', totalPages);
 
       prevPageButton.disabled = currentPage === 1;
       nextPageButton.disabled = currentPage === totalPages;
