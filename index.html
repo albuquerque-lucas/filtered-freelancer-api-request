@@ -43,7 +43,8 @@
     const allCategoriesList = [...tipyingCategory, ...virtualAssistantCategory, ...socialMediaCategory];
     let projects = []; // Array para armazenar todos os projetos
     let initialProjectsList = JSON.parse(localStorage.getItem('complete_initial_list'));
-    if (localStorage.getItem('complete_initial_list') !== null) {
+
+    if (initialProjectsList !== null) {
       console.log('nao e nulo');
       initialProjectList = JSON.parse(localStorage.getItem('filtered_list'));
       console.log('initialProjectList - 0', initialProjectsList);
@@ -55,6 +56,7 @@
     
     reloadQueryButton.addEventListener('click', (e) => {
       e.preventDefault();
+      localStorage.removeItem('filtered_list');
       localStorage.removeItem('saved_freelancer_projects');
       fetchProjects(currentPage, filterOptions.value);
       window.location.reload();
@@ -62,7 +64,7 @@
 
     const getAll = async (initialList) => {
       const savedProjects = localStorage.getItem('saved_freelancer_projects');
-      if (savedProjects) {
+      if (savedProjects !== null) {
         // console.log('Pegou do local storage');
         return JSON.parse(savedProjects);
       } else {
@@ -113,8 +115,13 @@
     
     filterButton.addEventListener('click', (e) => {
       e.preventDefault();
+
+      // if (filterOptions.value === 'all') {
+      //   localStorage.removeItem('filtered_list');
+      //   localStorage.removeItem('saved_freelancer_projects');
+      // }
+
       console.log('FILTER BTN', initialProjectsList);
-      localStorage.setItem('saved_freelancer_projects', JSON.stringify(projects));
       currentPage = 1; // Reset da página para a primeira
       fetchProjects(currentPage, filterOptions.value);
     });
@@ -127,11 +134,13 @@
 
           const completeList = [];
           console.log('Filtered Projects - 1:', all);
-
+          
           if(localStorage.getItem('filtered_list') !== null) {
-            all = JSON.parse(localStorage.getItem('filtered_list'));
+            all = JSON.parse(localStorage.getItem('complete_initial_list'));
           }
-
+          
+          localStorage.setItem('saved_freelancer_projects', JSON.stringify(all));
+          localStorage.setItem('complete_initial_list', JSON.stringify(all));
           const filteredProjects = all.map((item) => {
             return item.filter((subItem) =>{
               if (category === 'all') {
@@ -149,7 +158,14 @@
 
             });
           });
-          localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
+
+          if (category === 'all') {
+            localStorage.removeItem('filtered_list');
+          } else {
+            localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
+          }
+
+          // localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
           console.log('initialProjectList - 1', initialProjectsList);
           console.log('Filtered Projects - 2', filteredProjects);
 
@@ -159,7 +175,6 @@
                 return allCategoriesList.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
               });
             });
-            localStorage.setItem('complete_initial_list', JSON.stringify(initialProjectsList));
             initialProjectsList.forEach((item) => {
               item.forEach((subItem) => {
                 completeInitialList.push(subItem);
@@ -171,7 +186,7 @@
             localStorage.setItem('complete_initial_list', JSON.stringify(completeInitialList));
           }
 
-          localStorage.setItem('saved_freelancer_projects', JSON.stringify(filteredProjects));
+          // localStorage.setItem('saved_freelancer_projects', JSON.stringify(filteredProjects));
           filteredProjects.forEach((item) => {
             item.forEach((subItem) => {
               completeList.push(subItem);
