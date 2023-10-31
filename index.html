@@ -42,7 +42,7 @@
     let projects = []; // Array para armazenar todos os projetos
     let alternativeList = [];
     const projectsList = [];
-    const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission'];
+    const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission', 'content-writing', 'research', 'research_writing'];
     const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
     const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
     const allCategoriesList = [...tipyingCategory, ...virtualAssistantCategory, ...socialMediaCategory];
@@ -110,8 +110,8 @@
       }
     });
     
-    async function fetchProjects(page, category = 'all', offset = 0, primeList=projects) {
-      const all = await getAll(primeList);
+    async function fetchProjects(page, category = 'all', offset = 0) {
+      const all = await getAll(projects);
       localStorage.setItem('saved_freelancer_projects', JSON.stringify(all));
 
           const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
@@ -130,10 +130,12 @@
               } else if (category === 'social_media_professional') {
                 return socialMediaCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
               }
-              return false;
+              return allCategoriesList.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
 
             });
           });
+
+          projects = filteredProjects;
           console.log('all', all);
           localStorage.removeItem('saved_freelancer_projects');
           localStorage.setItem('saved_freelancer_projects', JSON.stringify(filteredProjects));
@@ -203,7 +205,7 @@
     prevPageButton.addEventListener('click', () => {
       if (currentPage > 1) {
         currentPage--;
-        fetchProjects(currentPage, 'all', 0,  alternativeList);
+        fetchProjects(currentPage);
       }
     });
 
@@ -211,7 +213,7 @@
       const totalPages = Math.ceil(projects.length / projectsPerPage);
       if (currentPage < totalPages && !fetching) {
         currentPage++;
-        fetchProjects(currentPage, 'all', 0, alternativeList);
+        fetchProjects(currentPage);
       };
     });
 
@@ -230,5 +232,5 @@
       return 'Nao foi encontrada categoria';
     }
   </script>
-</body>
+  </body>
 </html>
