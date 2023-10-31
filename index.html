@@ -65,9 +65,10 @@
     const getAll = async (initialList) => {
       const savedProjects = localStorage.getItem('saved_freelancer_projects');
       if (savedProjects !== null) {
-        // console.log('Pegou do local storage');
+        console.log('Coletando dados do armazenamento local.');
         return JSON.parse(savedProjects);
       } else {
+        console.log('Realizando requisicoes para API.');
         const response01 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=0`);
         const response02 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=100`);
         const response03 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=200`);
@@ -103,7 +104,7 @@
         // initialList.push(data09.result.projects);
         // initialList.push(data10.result.projects);
         // initialList.push(data11.result.projects);
-
+        console.log('Requisicoes completas. Lista inicial criada.');
         if (initialProjectsList.length < 2) {
           initialProjectsList = initialList;
         }
@@ -115,11 +116,6 @@
     
     filterButton.addEventListener('click', (e) => {
       e.preventDefault();
-
-      // if (filterOptions.value === 'all') {
-      //   localStorage.removeItem('filtered_list');
-      //   localStorage.removeItem('saved_freelancer_projects');
-      // }
 
       console.log('FILTER BTN', initialProjectsList);
       currentPage = 1; // Reset da página para a primeira
@@ -145,8 +141,6 @@
             return item.filter((subItem) =>{
               if (category === 'all') {
                 return allCategoriesList.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
-                console.log('socialMedia', allList);
-                return true; // Mostrar todos os projetos
               } else if (category === 'typing_professional') {
                 return tipyingCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
               } else if (category === 'virtual_assistant') {
@@ -165,10 +159,6 @@
             localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
           }
 
-          // localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
-          console.log('initialProjectList - 1', initialProjectsList);
-          console.log('Filtered Projects - 2', filteredProjects);
-
           if (localStorage.getItem('complete_initial_list') === null) {
             initialProjectsList = initialProjectsList.map((item) => {
               return item.filter((subItem) => {
@@ -181,12 +171,9 @@
               });
             });
             
-            console.log('initialProjectList - 2', initialProjectsList);
-            console.log('initialProjectList - 3', completeInitialList);
             localStorage.setItem('complete_initial_list', JSON.stringify(completeInitialList));
           }
 
-          // localStorage.setItem('saved_freelancer_projects', JSON.stringify(filteredProjects));
           filteredProjects.forEach((item) => {
             item.forEach((subItem) => {
               completeList.push(subItem);
@@ -234,7 +221,7 @@
 
     function updatePaginationButtons(referenceList) {
       const totalPages = Math.ceil(referenceList.length / projectsPerPage);
-      // console.log('no botao', totalPages);
+      console.log('Numero de paginas no filtro atual:', totalPages);
 
       prevPageButton.disabled = currentPage === 1;
       nextPageButton.disabled = currentPage === totalPages;
