@@ -8,6 +8,7 @@
 </head>
 <body>
   <div id='filter-container'>
+    <button id="reload">Recarregar busca</button>
     <button class="filter-button">Filtrar</button>
     <select id="filter-options">
         <option value="all">All</option>
@@ -30,15 +31,71 @@
     const filterButton = document.querySelector('.filter-button');
     const prevPageButton = document.querySelector('#prevPage');
     const nextPageButton = document.querySelector('#nextPage');
+    const reloadQueryButton = document.querySelector('#reload');
 
     let currentPage = 1; // Página atual
     const projectsPerPage = 10; // Projetos por página
     let projects = []; // Array para armazenar todos os projetos
+    const projectsTest = [];
     const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission'];
     const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
     const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
     let fetching = false; // Variável para controlar se já está buscando
+    
+    reloadQueryButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('saved_freelancer_projects');
+      fetchProjects(currentPage, filterOptions.value);
+      window.location.reload();
+    });
 
+    const getAll = async (initialList) => {
+      const savedProjects = localStorage.getItem('saved_freelancer_projects');
+      if (savedProjects) {
+        console.log('Pegou do local storage');
+        return JSON.parse(savedProjects);
+      } else {
+        const response01 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=0`);
+        const response02 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=100`);
+        const response03 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=200`);
+        const response04 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=300`);
+        const response05 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=400`);
+        const response06 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=500`);
+        const response07 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=600`);
+        // const response08 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=700`);
+        // const response09 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=800`);
+        // const response10 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=900`);
+        // const response11 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=1000`);
+
+        const data01 = await response01.json();
+        const data02 = await response02.json();
+        const data03 = await response03.json();
+        const data04 = await response04.json();
+        const data05 = await response05.json();
+        const data06 = await response06.json();
+        const data07 = await response07.json();
+        // const data08 = await response08.json();
+        // const data09 = await response09.json();
+        // const data10 = await response10.json();
+        // const data11 = await response11.json();
+
+        initialList.push(data01.result.projects);
+        initialList.push(data02.result.projects);
+        initialList.push(data03.result.projects);
+        initialList.push(data04.result.projects);
+        initialList.push(data05.result.projects);
+        initialList.push(data06.result.projects);
+        initialList.push(data07.result.projects);
+        // initialList.push(data08.result.projects);
+        // initialList.push(data09.result.projects);
+        // initialList.push(data10.result.projects);
+        // initialList.push(data11.result.projects);
+        return initialList;
+        
+      }
+    }
+    
+    
     filterButton.addEventListener('click', (e) => {
       e.preventDefault();
       if (!fetching) {
@@ -46,50 +103,37 @@
         fetchProjects(currentPage, filterOptions.value);
       }
     });
-
+    
     async function fetchProjects(page, category = 'all', offset = 0) {
-      try {
-        fetching = true; // Indica que está fazendo a busca
-        const response = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all/?offset=${offset}`);
-        if (!response.ok) {
-          throw new Error('Erro na solicitação da API');
-        }
-        const data = await response.json();
+      const all = await getAll(projectsTest);
+      localStorage.setItem('saved_freelancer_projects', JSON.stringify(all));
 
-        console.log(data, category);
-        if (data.result && data.result.projects) {
-          const newProjects = data.result.projects;
-
-          if (offset === 0) {
-            projects = newProjects; // Na primeira chamada, substituir os projetos existentes
-          } else {
-            projects = [...projects, ...newProjects]; // Nas chamadas subsequentes, acrescentar novos projetos à lista
-          }
-
-          // console.log(projects);
-          // const finalList = projects;
-          // console.log('lista final', finalList);
           const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
 
           const completeList = [];
-          const filteredProjects = projects.filter((item) => {
-            if (category === 'all') {
-              return true; // Mostrar todos os projetos
-            } else if (category === 'typing_professional') {
-              return tipyingCategory.some((word) => item.seo_url.match(new RegExp(`^(${word})/`, 'i')));
-            } else if (category === 'visual_assistant') {
-              return virtualAssistantCategory.some((word) => item.seo_url.match(new RegExp(`^(${word})/`, 'i')));
-            } else if (category === 'social_media_professional') {
-              return socialMediaCategory.some((word) => item.seo_url.match(new RegExp(`^(${word})/`, 'i')));
-            }
-            return false;
-          });
+          const filteredProjects = all.map((item) => {
+            return item.filter((subItem) =>{
+              if (category === 'all') {
+                return true; // Mostrar todos os projetos
+              } else if (category === 'typing_professional') {
+                return tipyingCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
+              } else if (category === 'visual_assistant') {
+                return virtualAssistantCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
+              } else if (category === 'social_media_professional') {
+                return socialMediaCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
+              }
+              return false;
 
+            });
+          });
+          console.log('all', all);
           filteredProjects.forEach((item) => {
-            completeList.push(item);
+            item.forEach((subItem) => {
+              completeList.push(subItem);
+            });
           });
-
-          const teste = completeList.map((item) => {
+          console.log('completeList', completeList);
+          const refactoredList = completeList.map((item) => {
             const newItem = {
               title: item.title,
               preview_description: item.preview_description,
@@ -98,62 +142,43 @@
             };
             return newItem;
           });
-          console.log('new object', teste);
-          if (completeList.length < 100 && offset < 900) {
-            console.log('A lista completa a ser disponibilizada ainda não possui 100 itens. Continuando a busca com offset ' + (offset + 100));
-            // Chama a função novamente com um novo offset para buscar mais itens
-            fetchProjects(currentPage, category, offset + 100);
-          } else {
-            fetching = false; // Indica que terminou a busca
-            console.log('Perfeito! Chegamos a 100 itens em uma lista.');
-            console.log('complete-list', completeList);
+          console.log('new object', refactoredList);
+          // Calcular o índice inicial e final dos projetos a serem exibidos
+          const startIndex = (page - 1) * projectsPerPage;
+          const endIndex = startIndex + projectsPerPage;
 
-            // Calcular o índice inicial e final dos projetos a serem exibidos
-            const startIndex = (page - 1) * projectsPerPage;
-            const endIndex = startIndex + projectsPerPage;
+          // Filtrar os projetos para a página atual
+          const projectsToDisplay = refactoredList.slice(startIndex, endIndex);
 
-            // Filtrar os projetos para a página atual
-            const projectsToDisplay = teste.slice(startIndex, endIndex);
+          // Limpar a lista antes de adicionar novos projetos
+          mainList.innerHTML = '';
+          projectsToDisplay.forEach((item) => {
+            const article = document.createElement('article');
+            article.className = 'api-result-list';
 
-            // Limpar a lista antes de adicionar novos projetos
-            mainList.innerHTML = '';
+            const contentContainer = document.createElement('div');
+            contentContainer.className = 'content-container';
+            contentContainer.innerHTML = `
+              <h6>${item.title}</h6>
+              <p class="category-name">${item.category}</p>
+              <p>${item.preview_description}</p>
+            `;
 
-            projectsToDisplay.forEach((item) => {
-              const article = document.createElement('article');
-              article.className = 'api-result-list';
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
+            const button = document.createElement('button');
+            button.innerHTML = `<a href="https://www.freelancer.com/projects/${item.seo_url}" target="_blank">Apply Now »</a>`;
+            buttonContainer.appendChild(button);
 
-              const contentContainer = document.createElement('div');
-              contentContainer.className = 'content-container';
-              contentContainer.innerHTML = `
-                <h6>${item.title}</h6>
-                <p class="category-name">${item.category}</p>
-                <p>${item.preview_description}</p>
-              `;
+            article.appendChild(contentContainer);
+            article.appendChild(buttonContainer);
 
-              const buttonContainer = document.createElement('div');
-              buttonContainer.className = 'button-container';
-              const button = document.createElement('button');
-              button.innerHTML = `<a href="https://www.freelancer.com/projects/${item.seo_url}" target="_blank">Apply Now »</a>`;
-              buttonContainer.appendChild(button);
+            mainList.appendChild(article);
+          });
 
-              article.appendChild(contentContainer);
-              article.appendChild(buttonContainer);
-
-              mainList.appendChild(article);
-            });
-
-            // Atualizar os botões de página
-            updatePaginationButtons();
-          }
-        } else {
-          console.log('Nenhum projeto encontrado.');
-          fetching = false; // Indica que terminou a busca
+          // Atualizar os botões de página
+          updatePaginationButtons();
         }
-      } catch (error) {
-        console.error('Erro na solicitação da API: ' + error.message);
-        fetching = false; // Indica que terminou a busca
-      }
-    }
 
     function updatePaginationButtons() {
       const totalPages = Math.ceil(projects.length / projectsPerPage);
@@ -174,13 +199,13 @@
       if (currentPage < totalPages && !fetching) {
         currentPage++;
         fetchProjects(currentPage);
-      }
+      };
     });
 
     // Chame a função para carregar a primeira página
     fetchProjects(currentPage);
 
-    // Função para obter o nome da categoria com base no URL
+    // // Função para obter o nome da categoria com base no URL
     function getCategoryName(seoUrl) {
       if (tipyingCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
         return 'Typing Professional';
