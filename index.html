@@ -40,10 +40,12 @@
     let currentPage = 1; // Página atual
     const projectsPerPage = 10; // Projetos por página
     let projects = []; // Array para armazenar todos os projetos
+    let alternativeList = [];
     const projectsList = [];
     const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission'];
     const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
     const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
+    const allCategoriesList = [...tipyingCategory, ...virtualAssistantCategory, ...socialMediaCategory];
     let fetching = false; // Variável para controlar se já está buscando
     
     reloadQueryButton.addEventListener('click', (e) => {
@@ -118,6 +120,8 @@
           const filteredProjects = all.map((item) => {
             return item.filter((subItem) =>{
               if (category === 'all') {
+                return allCategoriesList.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
+                console.log('socialMedia', allList);
                 return true; // Mostrar todos os projetos
               } else if (category === 'typing_professional') {
                 return tipyingCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
@@ -180,7 +184,6 @@
 
             mainList.appendChild(article);
           });
-
           // Atualizar os botões de página
           updatePaginationButtons(projects);
         }
@@ -193,10 +196,12 @@
       nextPageButton.disabled = currentPage === totalPages;
     }
 
+    alternativeList = projects;
+
     prevPageButton.addEventListener('click', () => {
       if (currentPage > 1) {
         currentPage--;
-        fetchProjects(currentPage, 'all', 0, projects);
+        fetchProjects(currentPage, 'all', 0,  alternativeList);
       }
     });
 
@@ -204,7 +209,7 @@
       const totalPages = Math.ceil(projects.length / projectsPerPage);
       if (currentPage < totalPages && !fetching) {
         currentPage++;
-        fetchProjects(currentPage, 'all', 0, projects);
+        fetchProjects(currentPage, 'all', 0, alternativeList);
       };
     });
 
