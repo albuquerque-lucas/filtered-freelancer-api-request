@@ -66,7 +66,9 @@
             projects = [...projects, ...newProjects]; // Nas chamadas subsequentes, acrescentar novos projetos à lista
           }
 
-          console.log(projects);
+          // console.log(projects);
+          // const finalList = projects;
+          // console.log('lista final', finalList);
           const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
 
           const completeList = [];
@@ -87,6 +89,16 @@
             completeList.push(item);
           });
 
+          const teste = completeList.map((item) => {
+            const newItem = {
+              title: item.title,
+              preview_description: item.preview_description,
+              seo_url: item.seo_url,
+              category: getCategoryName(item.seo_url),
+            };
+            return newItem;
+          });
+          console.log('new object', teste);
           if (completeList.length < 100 && offset < 900) {
             console.log('A lista completa a ser disponibilizada ainda não possui 100 itens. Continuando a busca com offset ' + (offset + 100));
             // Chama a função novamente com um novo offset para buscar mais itens
@@ -101,7 +113,7 @@
             const endIndex = startIndex + projectsPerPage;
 
             // Filtrar os projetos para a página atual
-            const projectsToDisplay = completeList.slice(startIndex, endIndex);
+            const projectsToDisplay = teste.slice(startIndex, endIndex);
 
             // Limpar a lista antes de adicionar novos projetos
             mainList.innerHTML = '';
@@ -114,6 +126,7 @@
               contentContainer.className = 'content-container';
               contentContainer.innerHTML = `
                 <h6>${item.title}</h6>
+                <p class="category-name">${item.category}</p>
                 <p>${item.preview_description}</p>
               `;
 
@@ -166,6 +179,18 @@
 
     // Chame a função para carregar a primeira página
     fetchProjects(currentPage);
+
+    // Função para obter o nome da categoria com base no URL
+    function getCategoryName(seoUrl) {
+      if (tipyingCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
+        return 'Typing Professional';
+      } else if (virtualAssistantCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
+        return 'Visual Assistant';
+      } else if (socialMediaCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
+        return 'Social Media Professional';
+      }
+      return 'Nao foi encontrada categoria';
+    }
   </script>
 </body>
 </html>
