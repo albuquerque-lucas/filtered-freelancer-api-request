@@ -135,6 +135,8 @@
             });
           });
           console.log('all', all);
+          localStorage.removeItem('saved_freelancer_projects');
+          localStorage.setItem('saved_freelancer_projects', JSON.stringify(filteredProjects));
           filteredProjects.forEach((item) => {
             item.forEach((subItem) => {
               completeList.push(subItem);
