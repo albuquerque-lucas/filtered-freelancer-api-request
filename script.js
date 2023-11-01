@@ -55,8 +55,6 @@
     let all = await getAll(projects);
       localStorage.setItem('saved_freelancer_projects', JSON.stringify(all));
 
-          const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
-
           const completeList = [];
           
           if(localStorage.getItem('filtered_list') !== null) {
@@ -125,10 +123,12 @@
 
             const contentContainer = document.createElement('div');
             contentContainer.className = 'content-container';
+            const submitDate = new Date(item.submitdate * 1000);
             contentContainer.innerHTML = `
               <h6>${item.title}</h6>
               <p class="category-name">${getCategoryName(item.seo_url)}</p>
-              <p>${item.preview_description}</p>
+              <p class='submit-date'>Posted ${formatDateTime(submitDate)}</p>
+              <p>${item.preview_description}...</p>
             `;
 
             const buttonContainer = document.createElement('div');
@@ -192,6 +192,17 @@
       currentPage++;
       fetchProjects(currentPage, filterOptions.value);
     }
+  }
+
+  function formatDateTime(data) {
+    const day = String(data.getDate()).padStart(2, '0');
+    const month = String(data.getMonth() + 1).padStart(2, '0'); // O mês é base 0, então somamos 1
+    const year = data.getFullYear();
+    const hours = String(data.getHours()).padStart(2, '0');
+    const minutes = String(data.getMinutes()).padStart(2, '0');
+    const seconds = String(data.getSeconds()).padStart(2, '0');
+  
+    return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
   }
 
   // Initial Fetch
