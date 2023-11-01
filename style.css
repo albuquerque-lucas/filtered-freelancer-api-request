@@ -137,3 +137,40 @@
   background-color: #61d09e;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Aumentando a sombra ao passar o mouse */
 }
+
+@media (max-width: 560px) {
+  /* Estilos para #filter-container */
+  #filter-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #filter-container button, #filter-container select {
+    margin: 0.5rem 0;
+  }
+
+  /* Estilos para .api-result-list */
+  .api-result-list {
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  .api-result-list h6, .api-result-list p {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .button-container {
+    margin-top: 1rem;
+  }
+
+  /* Estilos para #pagination */
+  #pagination {
+    flex-direction: column;
+  }
+
+  #pagination button {
+    margin: 0.5rem 0;
+  }
+}
