@@ -39,6 +39,10 @@
   font-size: 83%;
 }
 
+.category-name, .submit-date {
+  font-weight: 700;
+}
+
 .button-container {
   display: flex;
   flex-direction: column;
