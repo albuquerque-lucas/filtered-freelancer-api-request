@@ -26,114 +26,66 @@
   </div>
 
   <script>
+  // Constantes e Variaveis
+  const mainList = document.querySelector('#projects-main-list');
+  const filterOptions = document.querySelector('#filter-options');
+  const filterButton = document.querySelector('.filter-button');
+  const prevPageButton = document.querySelector('#prevPage');
+  const nextPageButton = document.querySelector('#nextPage');
+  const reloadQueryButton = document.querySelector('#reload');
+  const projectsPerPage = 10; // Projetos por página
+  const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission', 'content-writing', 'research', 'research_writing'];
+  const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
+  const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
+  const allCategoriesList = [...tipyingCategory, ...virtualAssistantCategory, ...socialMediaCategory];
+  let currentPage = 1; // Página atual
+  let projects = []; // Array para armazenar todos os projetos
+  let initialProjectsList = JSON.parse(localStorage.getItem('complete_initial_list')) || [];
 
-    const mainList = document.querySelector('#projects-main-list');
-    const filterOptions = document.querySelector('#filter-options');
-    const filterButton = document.querySelector('.filter-button');
-    const prevPageButton = document.querySelector('#prevPage');
-    const nextPageButton = document.querySelector('#nextPage');
-    const reloadQueryButton = document.querySelector('#reload');
+  // Event Listeners
+  reloadQueryButton.addEventListener('click', handleReload);
+  filterButton.addEventListener('click', handleFilter);
+  prevPageButton.addEventListener('click', handlePrevPage);
+  nextPageButton.addEventListener('click', handleNextPage);
 
-    let currentPage = 1; // Página atual
-    const projectsPerPage = 10; // Projetos por página
-    const projectsList = [];
-    const tipyingCategory = ['ghostwriting', 'ebooks', 'pdf', 'articles', 'fiction', 'reviews', 'article_submission', 'content-writing', 'research', 'research_writing'];
-    const virtualAssistantCategory = ['data_processing', 'data_entry', 'excel', 'video_upload', 'transcription', 'web_search', 'technical_support', 'phone_support', 'desktop_support', 'email_handling'];
-    const socialMediaCategory = ['website_design', 'logo_design', 'flash', 'banner_design', 'photoshop', 'industrial_design', 'rendering', 'typography', 'animation'];
-    const allCategoriesList = [...tipyingCategory, ...virtualAssistantCategory, ...socialMediaCategory];
-    let projects = []; // Array para armazenar todos os projetos
-    let initialProjectsList = JSON.parse(localStorage.getItem('complete_initial_list'));
+  // Functions
 
-    if (initialProjectsList !== null) {
-      console.log('nao e nulo');
-      initialProjectList = JSON.parse(localStorage.getItem('filtered_list'));
-      console.log('initialProjectList - 0', initialProjectsList);
-    } else {
-      console.log('e nulo');
-      initialProjectsList = [];
+  async function getAll(initialList) {
+  const savedProjects = localStorage.getItem('saved_freelancer_projects');
+  
+  if (savedProjects !== null) {
+    console.log('Coletando dados do armazenamento local.');
+    return JSON.parse(savedProjects);
+  } else {
+    console.log('Realizando requisições para a API.');
+    const data = [];
+
+    // Função auxiliar para fazer uma única requisição e adicionar à lista de dados
+    async function fetchData(offset) {
+      const response = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=${offset}`);
+      const data = await response.json();
+      initialList.push(data.result.projects);
     }
-    let completeInitialList = [];
-    
-    reloadQueryButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      localStorage.removeItem('filtered_list');
-      localStorage.removeItem('saved_freelancer_projects');
-      fetchProjects(currentPage, filterOptions.value);
-      window.location.reload();
-    });
 
-    const getAll = async (initialList) => {
-      const savedProjects = localStorage.getItem('saved_freelancer_projects');
-      if (savedProjects !== null) {
-        // console.log('Pegou do local storage');
-        return JSON.parse(savedProjects);
-      } else {
-        const response01 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=0`);
-        const response02 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=100`);
-        const response03 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=200`);
-        const response04 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=300`);
-        const response05 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=400`);
-        const response06 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=500`);
-        const response07 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=600`);
-        // const response08 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=700`);
-        // const response09 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=800`);
-        // const response10 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=900`);
-        // const response11 = await fetch(`https://www.freelancer.com/api/projects/0.1/projects/all?offset=1000`);
+    // Array de offsets para as requisições
+    const offsets = [0, 100, 200, 300, 400, 500, 600];
 
-        const data01 = await response01.json();
-        const data02 = await response02.json();
-        const data03 = await response03.json();
-        const data04 = await response04.json();
-        const data05 = await response05.json();
-        const data06 = await response06.json();
-        const data07 = await response07.json();
-        // const data08 = await response08.json();
-        // const data09 = await response09.json();
-        // const data10 = await response10.json();
-        // const data11 = await response11.json();
+    // Fazer as requisições em paralelo usando Promise.all
+    await Promise.all(offsets.map(offset => fetchData(offset)));
 
-        initialList.push(data01.result.projects);
-        initialList.push(data02.result.projects);
-        initialList.push(data03.result.projects);
-        initialList.push(data04.result.projects);
-        initialList.push(data05.result.projects);
-        initialList.push(data06.result.projects);
-        initialList.push(data07.result.projects);
-        // initialList.push(data08.result.projects);
-        // initialList.push(data09.result.projects);
-        // initialList.push(data10.result.projects);
-        // initialList.push(data11.result.projects);
+    localStorage.setItem('saved_freelancer_projects', JSON.stringify(initialList));
+    console.log('Requisições completas. Lista inicial criada.');
+    return initialList;
+  }
+}
 
-        if (initialProjectsList.length < 2) {
-          initialProjectsList = initialList;
-        }
-        return initialList;
-        
-      }
-    }
-    
-    
-    filterButton.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      // if (filterOptions.value === 'all') {
-      //   localStorage.removeItem('filtered_list');
-      //   localStorage.removeItem('saved_freelancer_projects');
-      // }
-
-      console.log('FILTER BTN', initialProjectsList);
-      currentPage = 1; // Reset da página para a primeira
-      fetchProjects(currentPage, filterOptions.value);
-    });
-    
-    async function fetchProjects(page, category = 'all') {
-      let all = await getAll(projects);
+  async function fetchProjects(page, category = 'all') {
+    let all = await getAll(projects);
       localStorage.setItem('saved_freelancer_projects', JSON.stringify(all));
 
           const regexCategory = new RegExp(`^${category}/`, 'i'); // Expressão regular
 
           const completeList = [];
-          console.log('Filtered Projects - 1:', all);
           
           if(localStorage.getItem('filtered_list') !== null) {
             all = JSON.parse(localStorage.getItem('complete_initial_list'));
@@ -145,8 +97,6 @@
             return item.filter((subItem) =>{
               if (category === 'all') {
                 return allCategoriesList.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
-                console.log('socialMedia', allList);
-                return true; // Mostrar todos os projetos
               } else if (category === 'typing_professional') {
                 return tipyingCategory.some((word) => subItem.seo_url.match(new RegExp(`^(${word})/`, 'i')));
               } else if (category === 'virtual_assistant') {
@@ -165,10 +115,6 @@
             localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
           }
 
-          // localStorage.setItem('filtered_list', JSON.stringify(filteredProjects));
-          console.log('initialProjectList - 1', initialProjectsList);
-          console.log('Filtered Projects - 2', filteredProjects);
-
           if (localStorage.getItem('complete_initial_list') === null) {
             initialProjectsList = initialProjectsList.map((item) => {
               return item.filter((subItem) => {
@@ -181,12 +127,9 @@
               });
             });
             
-            console.log('initialProjectList - 2', initialProjectsList);
-            console.log('initialProjectList - 3', completeInitialList);
             localStorage.setItem('complete_initial_list', JSON.stringify(completeInitialList));
           }
 
-          // localStorage.setItem('saved_freelancer_projects', JSON.stringify(filteredProjects));
           filteredProjects.forEach((item) => {
             item.forEach((subItem) => {
               completeList.push(subItem);
@@ -195,7 +138,6 @@
 
 
           projects = completeList;
-          console.log('new object', projects);
           // Calcular o índice inicial e final dos projetos a serem exibidos
           const startIndex = (page - 1) * projectsPerPage;
           const endIndex = startIndex + projectsPerPage;
@@ -230,39 +172,18 @@
           });
           // Atualizar os botões de página
           updatePaginationButtons(projects);
-        }
+  }
 
-    function updatePaginationButtons(referenceList) {
-      const totalPages = Math.ceil(referenceList.length / projectsPerPage);
-      // console.log('no botao', totalPages);
+  function updatePaginationButtons(referenceList) {
+    const totalPages = Math.ceil(referenceList.length / projectsPerPage);
+      console.log('Numero de paginas no filtro atual:', totalPages);
 
       prevPageButton.disabled = currentPage === 1;
       nextPageButton.disabled = currentPage === totalPages;
-    }
+  }
 
-    prevPageButton.addEventListener('click', () => {
-      fetchProjects(currentPage);
-      if (currentPage > 1) {
-        currentPage--;
-        fetchProjects(currentPage, filterOptions.value);
-      }
-    });
-
-    nextPageButton.addEventListener('click', () => {
-      fetchProjects(currentPage);
-      const totalPages = Math.ceil(projects.length / projectsPerPage);
-      if (currentPage < totalPages) {
-        currentPage++;
-        fetchProjects(currentPage, filterOptions.value);
-      };
-    });
-
-    // Chame a função para carregar a primeira página
-    fetchProjects(currentPage);
-
-    // // Função para obter o nome da categoria com base no URL
-    function getCategoryName(seoUrl) {
-      if (tipyingCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
+  function getCategoryName(seoUrl) {
+    if (tipyingCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
         return 'Typing Professional';
       } else if (virtualAssistantCategory.some((word) => seoUrl.match(new RegExp(`^(${word})/`, 'i')))) {
         return 'Virtual Assistant';
@@ -270,7 +191,40 @@
         return 'Social Media Professional';
       }
       return 'Nao foi encontrada categoria';
+  }
+
+  function handleReload(e) {
+    e.preventDefault();
+    localStorage.removeItem('filtered_list');
+    localStorage.removeItem('saved_freelancer_projects');
+    fetchProjects(currentPage, filterOptions.value);
+    window.location.reload();
+  }
+
+  function handleFilter(e) {
+    e.preventDefault();
+    currentPage = 1; // Reset da página para a primeira
+    fetchProjects(currentPage, filterOptions.value);
+  }
+
+  function handlePrevPage() {
+    if (currentPage > 1) {
+      currentPage--;
+      fetchProjects(currentPage, filterOptions.value);
     }
+  }
+
+  function handleNextPage() {
+    const totalPages = Math.ceil(projects.length / projectsPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      fetchProjects(currentPage, filterOptions.value);
+    }
+  }
+
+  // Initial Fetch
+  fetchProjects(currentPage);
+
   </script>
   </body>
 </html>
