@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <title>Document</title>
+  <title>Freelancer API Work Search</title>
 </head>
 <body>
   <div id='filter-container'>
-    <button id="reload">Recarregar busca</button>
-    <button class="filter-button">Filtrar</button>
+    <button id="reload" class="custom-btn">Reload Search</button>
+    <button class="filter-button custom-btn">Filter</button>
     <select id="filter-options">
         <option value="all">All</option>
         <option value="typing_professional">Typing Professional</option>
@@ -18,11 +18,14 @@
     </select>
   </div>
   <ul id='projects-main-list'>
-    <h3 class='loading-message'>Carregando...</h3>
+    <div class="loader">
+      <img src="https://trabalhosredessociais.com/wp-content/uploads/2023/10/833.gif" alt="">
+      <h5 class='loading-message'>Loading...</h5>
+    </div>
   </ul>
   <div id="pagination">
-    <button id="prevPage">Página Anterior</button>
-    <button id="nextPage">Próxima Página</button>
+    <button id="prevPage">Previows Page</button>
+    <button id="nextPage">Next Page</button>
   </div>
 
   <script>

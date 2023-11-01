@@ -18,6 +18,10 @@
   min-height: 1.8rem;
 }
 
+#projects-main-list {
+  min-height: 35vh;
+}
+
 .api-result-list {
   line-height: 20px;
   font-family: Roboto;
@@ -65,7 +69,15 @@ transition: 0.3s ease-out;
   color: white;
 }
 
-#projects-main-list h3{
+#projects-main-list .loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  top: 7rem;
+}
+
+#projects-main-list .loader .loading-message {
   padding: 1rem;
   text-align: center;
 }
@@ -99,4 +111,19 @@ transition: 0.3s ease-out;
 #pagination button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.custom-btn {
+  padding:0.8rem;
+  border-radius: 25px;
+  border: none;
+  background-color: #61d09e;
+  color: white;
+  font-weight: bold;
+  transition: 0.3s ease-out;
+  cursor: pointer;
+}
+
+.custom-btn:hover {
+  background-color: #198754;
 }
